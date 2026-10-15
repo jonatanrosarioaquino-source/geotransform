@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoTransform | Transformaciones geométricas</title>
+<style>
+:root{--bg:#f4f7fb;--panel:#fff;--ink:#172338;--muted:#637187;--line:#dce4ef;--blue:#2563eb;--purple:#7c3aed;--green:#0f9d83;--shadow:0 12px 32px #243b5310}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,#12213b,#203d68);color:white;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:13px;background:#ffffff1c;display:grid;place-items:center;font-size:24px}.brand h1{font-size:21px;margin:0;letter-spacing:.3px}.brand p{margin:2px 0 0;color:#d7e3f5;font-size:12px}.top-pill{border:1px solid #ffffff44;border-radius:999px;padding:7px 12px;color:#e8f0ff;font-size:12px}
+main{max-width:1600px;margin:0 auto;padding:18px;display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px}
+.sidebar{display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 116px);overflow:auto;padding-right:3px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow)}.card h2{font-size:13px;margin:0 0 12px;text-transform:uppercase;letter-spacing:.7px;color:#31435e}.field{display:flex;flex-direction:column;gap:5px;margin:9px 0}.field label,.small-label{font-size:12px;font-weight:650;color:#4a5b73}.field input,.field select,textarea{width:100%;min-width:0;border:1px solid #ccd7e5;background:#fbfdff;border-radius:8px;padding:9px 10px;color:var(--ink);font:inherit;outline:none}.field input:focus,.field select:focus,textarea:focus{border-color:#7da6f8;box-shadow:0 0 0 3px #2563eb16}.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}.btn{border:1px solid #cbd6e5;background:#f8faff;color:#27364e;padding:9px 10px;border-radius:8px;cursor:pointer;font:600 12px inherit;transition:.15s}.btn:hover{filter:brightness(.97);border-color:#8ca8d5}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.purple{background:var(--purple);border-color:var(--purple);color:white}.btn.green{background:var(--green);border-color:var(--green);color:white}.btn.danger{color:#b42318;background:#fff7f6;border-color:#f1c5c1}.btn.active{outline:3px solid #2563eb24;border-color:var(--blue);background:#eaf1ff;color:#1d4ed8}.button-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.hint{font-size:11px;color:var(--muted);margin:8px 0 0}.check{display:flex;align-items:center;gap:8px;font-size:12px;color:#45556b;margin:8px 0}.check input{accent-color:var(--blue)}
+.workspace{min-width:0;display:flex;flex-direction:column;gap:12px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}.mode-buttons{display:flex;gap:6px;flex-wrap:wrap}.mode-buttons .btn{padding:8px 11px}.status{font-size:12px;color:#52637a}.canvas-card{position:relative;background:white;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);min-height:520px;flex:1}.canvas-head{position:absolute;z-index:2;left:16px;right:16px;top:13px;display:flex;justify-content:space-between;gap:10px;pointer-events:none}.canvas-head span{background:#ffffffeb;border:1px solid #e0e7f0;border-radius:8px;padding:6px 9px;color:#586980;font-size:11px}.canvas-head .legend{display:flex;gap:10px;flex-wrap:wrap}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}.canvas-card canvas{width:100%;height:100%;min-height:520px;display:block;touch-action:none;cursor:crosshair}.below{display:grid;grid-template-columns:1fr 1fr;gap:12px}.info-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 15px}.info-card h3{font-size:12px;margin:0 0 8px;color:#31435e}.coords{font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#53637a;white-space:pre-wrap;overflow-wrap:anywhere}.statusline{font-size:12px;color:#4c6078;min-height:18px}.footer{max-width:1600px;margin:-8px auto 18px;padding:0 20px;color:#7a8799;font-size:11px}
+@media(max-width:1000px){main{grid-template-columns:300px minmax(0,1fr);padding:12px;gap:12px}.sidebar{max-height:none}.canvas-card, .canvas-card canvas{min-height:480px}}
+@media(max-width:760px){header{padding:16px}.brand h1{font-size:18px}main{display:flex;flex-direction:column}.sidebar{overflow:visible}.workspace{order:-1}.canvas-card,.canvas-card canvas{min-height:420px}.below{grid-template-columns:1fr}.top-pill{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">⌘</div><div><h1>GeoTransform</h1><p>Editor interactivo de transformaciones geométricas</p></div></div>
+  <div class="top-pill">Plano cartesiano · Rotación · Homotecia · Reflexión</div>
+</header>
+<main>
+<aside class="sidebar">
+  <section class="card">
+    <h2>1. Figura</h2>
+    <div class="field"><label for="preset">Figura predefinida</label><select id="preset"><option>Sin figura</option><option>Cuadrado</option><option>Triángulo</option><option>Rectángulo</option><option>Flecha</option></select></div>
+    <div class="field"><label for="xs">Coordenadas X (separadas por comas)</label><input id="xs" value="-2, 2, 2, -2" spellcheck="false"></div>
+    <div class="field"><label for="ys">Coordenadas Y (separadas por comas)</label><input id="ys" value="-2, -2, 2, 2" spellcheck="false"></div>
+    <button class="btn primary" id="applyCoords" style="width:100%">Usar coordenadas</button>
+    <div class="row" style="margin-top:8px"><button class="btn" id="loadFile">Cargar TXT/CSV</button><button class="btn" id="saveFile">Guardar TXT</button><input type="file" id="fileInput" accept=".txt,.csv,text/plain,text/csv" hidden></div>
+    <p class="hint">Formato de archivo: una coordenada por línea, como X,Y.</p>
+  </section>
+  <section class="card">
+    <h2>2. Plano cartesiano</h2>
+    <div class="row">
+      <div class="field"><label for="limitX">Límite X (±)</label><input id="limitX" type="number" min="1" max="200" value="12"></div>
+      <div class="field"><label for="limitY">Límite Y (±)</label><input id="limitY" type="number" min="1" max="200" value="12"></div>
+    </div>
+    <button class="btn" id="applyLimits" style="width:100%">Aplicar tamaño del plano</button>
+    <label class="check"><input id="showCoords" type="checkbox" checked> Mostrar coordenadas</label>
+    <label class="check"><input id="showNumbers" type="checkbox" checked> Mostrar numeración de los ejes</label>
+  </section>
+  <section class="card">
+    <h2>3. Crear y editar con mouse</h2>
+    <div class="button-grid">
+      <button class="btn active" data-mode="select">Seleccionar</button>
+      <button class="btn" data-mode="draw">Nuevo dibujo</button>
+      <button class="btn" data-mode="move">Mover figura</button>
+      <button class="btn" data-mode="rotate">Rotar con mouse</button>
+    </div>
+    <p class="hint" id="modeHint">Seleccionar: elige una figura o aplica una transformación.</p>
+    <div class="row" style="margin-top:8px"><button class="btn" id="finishDraw">Conectar y usar figura</button><button class="btn" id="undoPoint">Borrar último punto</button></div>
+    <button class="btn danger" id="clearAll" style="width:100%;margin-top:8px">Limpiar figura completa</button>
+  </section>
+  <section class="card">
+    <h2>4. Rotación</h2>
+    <div class="field"><label for="angle">Ángulo (grados)</label><input id="angle" type="number" value="90" step="any"></div>
+    <div class="field"><label for="direction">Sentido</label><select id="direction"><option value="1">Antihorario (+)</option><option value="-1">Horario (-)</option></select></div>
+    <button class="btn primary" id="rotateOrigin" style="width:100%">Rotar alrededor del origen</button>
+    <div class="row">
+      <div class="field"><label for="rotCx">Centro X</label><input id="rotCx" type="number" value="0" step="any"></div>
+      <div class="field"><label for="rotCy">Centro Y</label><input id="rotCy" type="number" value="0" step="any"></div>
+    </div>
+    <button class="btn" id="rotateCenter" style="width:100%">Rotar alrededor del punto</button>
+  </section>
+  <section class="card">
+    <h2>5. Homotecia</h2>
+    <div class="row">
+      <div class="field"><label for="factor">Factor k</label><input id="factor" type="number" value="2" step="any"></div>
+      <div class="field"><label for="homCx">Centro X</label><input id="homCx" type="number" value="0" step="any"></div>
+      <div class="field"><label for="homCy">Centro Y</label><input id="homCy" type="number" value="0" step="any"></div>
+    </div>
+    <button class="btn green" id="homothety" style="width:100%">Aplicar homotecia</button>
+  </section>
+  <section class="card">
+    <h2>6. Reflexión</h2>
+    <div class="field"><label for="lineType">Recta de reflexión</label><select id="lineType"><option value="x">Eje X (y = 0)</option><option value="y">Eje Y (x = 0)</option><option value="diag">Recta y = x</option><option value="negdiag">Recta y = -x</option><option value="custom">Personalizada (y = mx + b)</option></select></div>
+    <div class="row" id="customLine" hidden>
+      <div class="field"><label for="slope">Pendiente m</label><input id="slope" type="number" value="1" step="any"></div>
+      <div class="field"><label for="intercept">Término b</label><input id="intercept" type="number" value="0" step="any"></div>
+    </div>
+    <label class="check"><input id="showLine" type="checkbox" checked> Mostrar recta en el plano</label>
+    <button class="btn purple" id="reflect" style="width:100%">Aplicar reflexión</button>
+  </section>
+  <section class="card">
+    <h2>7. Visualización</h2>
+    <div class="row">
+      <div class="field"><label for="originalColor">Color original</label><input id="originalColor" type="color" value="#2563eb"></div>
+      <div class="field"><label for="resultColor">Color transformada</label><input id="resultColor" type="color" value="#dc3545"></div>
+    </div>
+    <button class="btn" id="restore" style="width:100%">Restaurar figura original</button>
+  </section>
+</aside>
+<section class="workspace">
+  <div class="toolbar">
+    <div class="mode-buttons"><button class="btn active" data-mode="select">Seleccionar</button><button class="btn" data-mode="draw">Dibujar</button><button class="btn" data-mode="move">Mover</button><button class="btn" data-mode="rotate">Rotar</button></div>
+    <div class="status" id="status">Listo. Selecciona una figura para comenzar.</div>
+  </div>
+  <div class="canvas-card">
+    <div class="canvas-head"><span id="rangeLabel">Plano: ±12 × ±12</span><span class="legend"><span><i class="dot" style="background:#2563eb"></i>Original</span><span><i class="dot" style="background:#dc3545"></i>Transformada</span></span></div>
+    <canvas id="plane" aria-label="Plano cartesiano interactivo"></canvas>
+  </div>
+  <div class="below">
+    <div class="info-card"><h3>Coordenadas de la figura original</h3><div class="coords" id="originalCoords">Sin puntos</div></div>
+    <div class="info-card"><h3>Coordenadas transformadas</h3><div class="coords" id="resultCoords">Aplica una transformación para ver los resultados.</div></div>
+  </div>
+</section>
+</main>
+<div class="footer">GeoTransform · Herramienta educativa para explorar transformaciones geométricas en el plano cartesiano.</div>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const canvas = $('plane'), ctx = canvas.getContext('2d');
+const presets = {
+  'Sin figura': [[],[]],
+  'Cuadrado': [[-2,2,2,-2],[-2,-2,2,2]],
+  'Triángulo': [[-2,2,0],[-2,-2,2]],
+  'Rectángulo': [[-3,3,3,-3],[-2,-2,2,2]],
+  'Flecha': [[0,1,1,2,-2,-1,-1],[3,1,0,0,0,0,1]]
+};
+let original=[], result=null, draft=[], mode='select', limits={x:12,y:12};
+let drag=null, pivot=null, initialAngle=0, currentRotation=0;
+const fmt = n => Math.abs(n-Math.round(n))<1e-7 ? String(Math.round(n)) : String(Number(n.toFixed(3)));
+const num = id => { const v=Number($(id).value); if(!Number.isFinite(v)) throw Error('Ingresa valores numéricos válidos.'); return v; };
+function setStatus(s){$('status').textContent=s;}
+function setMode(m){
+ mode=m; document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+ const hints={select:'Seleccionar: elige una figura o aplica una transformación.',draw:'Dibujo: haz clic en el plano para añadir vértices; luego conecta la figura.',move:'Mover: arrastra sobre el plano para trasladar la figura.',rotate:'Rotar: haz clic cerca de un vértice y arrastra para girar alrededor de él.'};
+ $('modeHint').textContent=hints[m]; canvas.style.cursor=m==='draw'?'crosshair':m==='move'?'move':m==='rotate'?'grab':'default'; setStatus(hints[m]); render();
+}
+function coordsToScreen(x,y){const r=canvas.getBoundingClientRect(), scale=Math.min((r.width*.46)/limits.x,(r.height*.43)/limits.y);return [r.width/2+x*scale,r.height/2-y*scale];}
+function screenToCoords(px,py){const r=canvas.getBoundingClientRect(),scale=Math.min((r.width*.46)/limits.x,(r.height*.43)/limits.y);return [(px-r.width/2)/scale,(r.height/2-py)/scale];}
+function resize(){const r=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;canvas.width=Math.max(1,Math.floor(r.width*dpr));canvas.height=Math.max(1,Math.floor(r.height*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);render();}
+function line(x1,y1,x2,y2,color,width=1,dash=[]){ctx.beginPath();ctx.setLineDash(dash);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.setLineDash([]);}
+function drawGrid(){
+ const r=canvas.getBoundingClientRect(),w=r.width,h=r.height,cx=w/2,cy=h/2,scale=Math.min((w*.46)/limits.x,(h*.43)/limits.y);
+ ctx.clearRect(0,0,w,h);ctx.fillStyle='#fcfdff';ctx.fillRect(0,0,w,h);
+ for(let i=-Math.ceil(limits.x);i<=Math.ceil(limits.x);i++){let x=cx+i*scale;if(x>=0&&x<=w)line(x,0,x,h,'#e8edf5',1);}
+ for(let i=-Math.ceil(limits.y);i<=Math.ceil(limits.y);i++){let y=cy-i*scale;if(y>=0&&y<=h)line(0,y,w,y,'#e8edf5',1);}
+ line(0,cy,w,cy,'#34465f',1.7);line(cx,0,cx,h,'#34465f',1.7);
+ if($('showNumbers').checked){
+  ctx.fillStyle='#6a7890';ctx.font='10px system-ui';ctx.textAlign='center';ctx.textBaseline='top';
+  for(let i=-Math.ceil(limits.x);i<=Math.ceil(limits.x);i++){if(i===0)continue;let x=cx+i*scale;if(x>8&&x<w-8)ctx.fillText(i,x,cy+5);}
+  ctx.textAlign='left';ctx.textBaseline='middle';
+  for(let i=-Math.ceil(limits.y);i<=Math.ceil(limits.y);i++){if(i===0)continue;let y=cy-i*scale;if(y>8&&y<h-8)ctx.fillText(i,cx+5,y);}
+ }
+ ctx.fillStyle='#243b5a';ctx.font='bold 12px system-ui';ctx.textAlign='right';ctx.fillText('X',w-12,cy-10);ctx.textAlign='left';ctx.fillText('Y',cx+10,15);
+}
+function getLine(){
+ const t=$('lineType').value;
+ if(t==='x')return {a:0,b:1,c:0,label:'y = 0'};
+ if(t==='y')return {a:1,b:0,c:0,label:'x = 0'};
+ if(t==='diag')return {a:1,b:-1,c:0,label:'y = x'};
+ if(t==='negdiag')return {a:1,b:1,c:0,label:'y = -x'};
+ const m=num('slope'),b=num('intercept');return {a:m,b:-1,c:b,label:`y = ${fmt(m)}x ${b<0?'-':'+'} ${fmt(Math.abs(b))}`};
+}
+function drawReflectionLine(){
+ if(!$('showLine').checked)return;
+ let l;try{l=getLine()}catch{return}
+ const den=l.a*l.a+l.b*l.b;if(!den)return;
+ const x0=-l.a*l.c/den,y0=-l.b*l.c/den,n=Math.sqrt(den),dx=-l.b/n,dy=l.a/n,L=1000;
+ const p1=coordsToScreen(x0-dx*L,y0-dy*L),p2=coordsToScreen(x0+dx*L,y0+dy*L);
+ line(...p1,...p2,'#8b5cf6',2,[7,5]);
+ ctx.fillStyle='#7c3aed';ctx.font='bold 11px system-ui';ctx.fillText(l.label,12,42);
+}
+function drawFigure(points,color,closed=true,ghost=false){
+ if(points.length<1)return;
+ const ps=points.map(p=>coordsToScreen(p[0],p[1]));
+ if(points.length>=2){ctx.beginPath();ctx.moveTo(...ps[0]);for(let i=1;i<ps.length;i++)ctx.lineTo(...ps[i]);if(closed&&points.length>=3)ctx.closePath();ctx.strokeStyle=color;ctx.lineWidth=ghost?2:2.8;ctx.globalAlpha=ghost?.45:1;ctx.stroke();ctx.globalAlpha=1;}
+ ps.forEach((p,i)=>{ctx.beginPath();ctx.arc(p[0],p[1],4.3,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.3;ctx.stroke();if($('showCoords').checked){ctx.fillStyle=color;ctx.font='11px system-ui';ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText(`${String.fromCharCode(65+i)} (${fmt(points[i][0])}, ${fmt(points[i][1])})`,p[0]+7,p[1]-5);}});
+}
+function render(){
+ if(!ctx)return;const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
+ // redraw at CSS-pixel dimensions after DPR transform
+ drawGrid();drawReflectionLine();
+ if(original.length)drawFigure(original,$('originalColor').value,true,false);
+ if(result)drawFigure(result,$('resultColor').value,true,false);
+ if(draft.length)drawFigure(draft,$('originalColor').value,false,false);
+ $('rangeLabel').textContent=`Plano: ±${fmt(limits.x)} × ±${fmt(limits.y)}`;
+ $('originalCoords').textContent=original.length?original.map((p,i)=>`${String.fromCharCode(65+i)} = (${fmt(p[0])}, ${fmt(p[1])})`).join('\n'):'Sin puntos';
+ $('resultCoords').textContent=result?result.map((p,i)=>`${String.fromCharCode(65+i)}′ = (${fmt(p[0])}, ${fmt(p[1])})`).join('\n'):'Aplica una transformación para ver los resultados.';
+}
+function parseList(id){const s=$(id).value.trim();if(!s)throw Error('Debes ingresar coordenadas X e Y.');const a=s.split(',').map(v=>Number(v.trim()));if(a.some(v=>!Number.isFinite(v)))throw Error('Las coordenadas deben ser numéricas y separarse con comas.');return a;}
+function setOriginal(points){original=points.map(p=>[...p]);result=null;draft=[];$('xs').value=original.map(p=>fmt(p[0])).join(', ');$('ys').value=original.map(p=>fmt(p[1])).join(', ');render();}
+function requireFigure(){if(original.length<2)throw Error('Primero crea o selecciona una figura con al menos 2 puntos.');}
+function transform(fn){try{requireFigure();result=original.map(p=>fn(p[0],p[1]));render();setStatus('Transformación aplicada. La figura original se conserva en azul.');}catch(e){alert(e.message);}}
+function rotatePoint(x,y,a,cx,cy){const r=a*Math.PI/180,dx=x-cx,dy=y-cy;return [+(cx+dx*Math.cos(r)-dy*Math.sin(r)).toFixed(3),+(cy+dx*Math.sin(r)+dy*Math.cos(r)).toFixed(3)];}
+$('preset').addEventListener('change',()=>{const [xs,ys]=presets[$('preset').value];setOriginal(xs.map((x,i)=>[x,ys[i]]));setMode($('preset').value==='Sin figura'?'draw':'select');});
+$('applyCoords').onclick=()=>{try{const xs=parseList('xs'),ys=parseList('ys');if(xs.length!==ys.length)throw Error('X e Y deben tener la misma cantidad de valores.');if(xs.length<2)throw Error('Ingresa al menos 2 puntos.');setOriginal(xs.map((x,i)=>[x,ys[i]]));setStatus('Coordenadas cargadas correctamente.');}catch(e){alert(e.message);}};
+$('applyLimits').onclick=()=>{try{const x=num('limitX'),y=num('limitY');if(x<=0||y<=0||x>200||y>200)throw Error('Los límites deben estar entre 1 y 200.');limits={x,y};render();}catch(e){alert(e.message);}};
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+$('finishDraw').onclick=()=>{if(draft.length<2){alert('Dibuja al menos 2 puntos en el plano.');return;}setOriginal(draft);setMode('select');};
+$('undoPoint').onclick=()=>{draft.pop();render();};
+$('clearAll').onclick=()=>{setOriginal([]);$('preset').value='Sin figura';setMode('draw');};
+$('restore').onclick=()=>{result=null;render();setStatus('Se restauró la vista de la figura original.');};
+$('rotateOrigin').onclick=()=>transform((x,y)=>rotatePoint(x,y,num('angle')*num('direction'),0,0));
+$('rotateCenter').onclick=()=>transform((x,y)=>rotatePoint(x,y,num('angle')*num('direction'),num('rotCx'),num('rotCy')));
+$('homothety').onclick=()=>transform((x,y)=>[+(num('homCx')+num('factor')*(x-num('homCx'))).toFixed(3),+(num('homCy')+num('factor')*(y-num('homCy'))).toFixed(3)]);
+$('reflect').onclick=()=>transform((x,y)=>{const l=getLine(),d=(l.a*x+l.b*y+l.c)/(l.a*l.a+l.b*l.b);return [+(x-2*l.a*d).toFixed(3),+(y-2*l.b*d).toFixed(3)];});
+$('lineType').onchange=()=>{$('customLine').hidden=$('lineType').value!=='custom';render();};
+['slope','intercept','showLine','showCoords','showNumbers','originalColor','resultColor'].forEach(id=>$(id).addEventListener('input',render));
+$('loadFile').onclick=()=>$('fileInput').click();
+$('fileInput').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const lines=(await f.text()).split(/\r?\n/).map(s=>s.trim()).filter(Boolean),pts=[];for(let i=0;i<lines.length;i++){let parts=lines[i].replace(';',',').split(',');if(i===0&&parts.length>=2&&(!Number.isFinite(Number(parts[0]))||!Number.isFinite(Number(parts[1]))))continue;if(parts.length>=2){const x=Number(parts[0]),y=Number(parts[1]);if(Number.isFinite(x)&&Number.isFinite(y))pts.push([x,y]);}}if(pts.length<2)throw Error('El archivo debe tener al menos dos filas con X,Y.');setOriginal(pts);setStatus(`Se cargaron ${pts.length} puntos desde ${f.name}.`);}catch(err){alert(err.message);}e.target.value='';};
+$('saveFile').onclick=()=>{if(original.length<2){alert('Primero crea una figura.');return;}const body='X,Y\n'+original.map(p=>`${fmt(p[0])},${fmt(p[1])}`).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([body],{type:'text/plain;charset=utf-8'}));a.download='geotransform_figura.txt';a.click();URL.revokeObjectURL(a.href);};
+function nearestPoint(x,y){let best=-1,dmin=Infinity;original.forEach((p,i)=>{const s=coordsToScreen(...p),d=Math.hypot(s[0]-x,s[1]-y);if(d<dmin){best=i;dmin=d;}});return dmin<18?best:-1;}
+function pointerPos(e){const r=canvas.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];}
+canvas.addEventListener('pointerdown',e=>{
+ const [px,py]=pointerPos(e),p=screenToCoords(px,py);
+ if(mode==='draw'){if(draft.length){const q=draft[draft.length-1];if(Math.hypot(q[0]-p[0],q[1]-p[1])<.05)return;}draft.push(p);render();return;}
+ if(mode==='move'&&original.length){drag={type:'move',start:p,points:original.map(q=>[...q])};canvas.setPointerCapture(e.pointerId);return;}
+ if(mode==='rotate'&&original.length){const i=nearestPoint(px,py);if(i<0){setStatus('Haz clic cerca de un vértice para elegir el centro de rotación.');return;}pivot=original[i];const dx=p[0]-pivot[0],dy=p[1]-pivot[1];initialAngle=Math.atan2(dy,dx)*180/Math.PI;currentRotation=0;drag={type:'rotate',points:original.map(q=>[...q])};canvas.setPointerCapture(e.pointerId);setStatus('Arrastra el mouse para rotar la figura.');return;}
+});
+canvas.addEventListener('pointermove',e=>{
+ if(!drag)return;const [px,py]=pointerPos(e),p=screenToCoords(px,py);
+ if(drag.type==='move'){const dx=p[0]-drag.start[0],dy=p[1]-drag.start[1];result=drag.points.map(q=>[+(q[0]+dx).toFixed(3),+(q[1]+dy).toFixed(3)]);render();}
+ if(drag.type==='rotate'){const a=Math.atan2(p[1]-pivot[1],p[0]-pivot[0])*180/Math.PI;let diff=a-initialAngle;while(diff>180)diff-=360;while(diff< -180)diff+=360;currentRotation=diff;result=drag.points.map(q=>rotatePoint(q[0],q[1],diff,pivot[0],pivot[1]));render();setStatus(`Rotación con mouse: ${diff.toFixed(1)}°`);}
+});
+function finishDrag(){if(!drag)return;if(result){original=result.map(p=>[...p]);result=null;$('xs').value=original.map(p=>fmt(p[0])).join(', ');$('ys').value=original.map(p=>fmt(p[1])).join(', ');}drag=null;pivot=null;render();setStatus('Edición finalizada.');}
+canvas.addEventListener('pointerup',finishDrag);canvas.addEventListener('pointercancel',finishDrag);
+window.addEventListener('resize',resize);
+resize();setOriginal(presets.Cuadrado[0].map((x,i)=>[x,presets.Cuadrado[1][i]]));$('preset').value='Cuadrado';setMode('select');
+})();
+</script>
+</body>
+</html>
